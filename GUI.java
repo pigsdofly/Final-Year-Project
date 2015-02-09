@@ -28,7 +28,7 @@ class GUI extends JPanel implements ActionListener {
 	
 	public GUI(int w, int h) {
 	//default constructor for the GUI
-		super();
+	//	super();
 		this.w = w;
 		this.h = h;
 		this.setSize(w,h);
@@ -37,17 +37,26 @@ class GUI extends JPanel implements ActionListener {
 		vis	= new Visualisation(visual.getSize());
 		repaint();
 	}
-
 	@Override
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
+	public void paint(Graphics g) {
+		super.paint(g);
+		Graphics2D g2 = (Graphics2D) g;
+		drawing(g2);
+	}
 
+	private void drawing(Graphics2D g2) {
 		vis.updateSize(visual.getSize());
-		int x = vis.getRectX() + xoff;
+		xoff = sidebar.getSize().width;
+		int x = vis.getRectX();
 		int y = vis.getRectY();
 
-		Graphics2D g2 = (Graphics2D) g;
-		g2.drawRect(xoff + (x/9),x,y/9,y);
+		double width = x * 0.4;
+
+		int w = (int) width;
+
+		g2.drawRect(x/7,y/10,x - xoff,y);
+		g2.drawOval(x/5,y/10,w,y);
+	
 	}
 
 	private void setupLayout() {
@@ -73,17 +82,18 @@ class GUI extends JPanel implements ActionListener {
 		sidebar.add(SCAN);
 	
 		this.add(sidebar,BorderLayout.WEST);
+		
 	
 	}
 
 	private void centerSetup() {
 	//setup for everything that isn't the sidebar
 		visual = new JPanel(); //Panel for the visualisation
-
+		
 		inputfield = new JPanel();
 		inputfield.setLayout(new GridBagLayout());
 		c = new GridBagConstraints();
-
+		//layout for the user inputs and buttons
 		c.gridx = 0;
 		c.gridy = 0;
 		c.fill = GridBagConstraints.NONE;
@@ -137,6 +147,7 @@ class GUI extends JPanel implements ActionListener {
 	}
 
 	private void textEntered() {
+	//input handling and validation for the text input box
 		int i;
 		try {
 			String txt = textInput.getText();
@@ -180,6 +191,7 @@ class GUI extends JPanel implements ActionListener {
 	}
 
 	private void clearText() {
+	//clears all inputs
 		textInput.setText("");
 		iInputs.clear();
 		cInput.setText("");
@@ -199,3 +211,4 @@ class GUI extends JPanel implements ActionListener {
 		}
 	}
 }
+

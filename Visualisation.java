@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 class Visualisation {
 	
+	private enum mode {FCFS,SSTF,SCAN};
+
 	private Dimension vSize;
 	private int rectX;
 	private int rectY;
@@ -12,7 +14,7 @@ class Visualisation {
 	public Visualisation(Dimension vSize) {
 		updateSize(vSize);
 	}
-	
+
 	public void updateSize(Dimension vSize) {
 		this.vSize = vSize;
 		setRect();
