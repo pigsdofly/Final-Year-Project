@@ -7,7 +7,16 @@ public class main {
 	public static void main(String[] args) {
 		try {
 			UIManager.setLookAndFeel(
-				UIManager.getCrossPlatformLookAndFeelClassName());
+				UIManager.getCrossPlatformLookAndFeelClassName());//changes look and feel from 
+																  //ugly java default
+			for (javax.swing.UIManager.LookAndFeelInfo info : 
+				javax.swing.UIManager.getInstalledLookAndFeels()) {
+		    	if ("com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+					.equals(info.getClassName())) {   
+			       	javax.swing.UIManager.setLookAndFeel(info.getClassName());
+				          break;
+					} 
+			} //hacky way of getting look and feel working with GTK+
 		} catch (Exception e) {
 			return;
 		}	
