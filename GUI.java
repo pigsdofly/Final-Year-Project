@@ -20,8 +20,9 @@ class GUI extends JPanel implements ActionListener {
 										    //and inputs respectively
 	private int w, h;
 	private int xoff; 					    // x offset for visualisation
+	private String output;
 	private String[] sInputs;
-	public ArrayList<Object> iInputs;
+	public ArrayList<Integer> iInputs = new ArrayList<Integer>();
 
 	private Visualisation vis;
 	
@@ -34,6 +35,7 @@ class GUI extends JPanel implements ActionListener {
 		setupLayout();
 
 		vis	= new Visualisation(visual.getSize());
+		repaint();
 	}
 
 	@Override
@@ -92,7 +94,7 @@ class GUI extends JPanel implements ActionListener {
 		
 		c.gridx = 0;
 		c.gridy = 1;
-		inputfield.add(new JLabel("Enter a list of numbers separated by commas:"),c);
+		inputfield.add(new JLabel("Enter a list of numbers (between 1 and 255) separated by commas:"),c);
 		
 		textInput = new JTextField(20);
 		c.gridx = 0;
@@ -138,26 +140,39 @@ class GUI extends JPanel implements ActionListener {
 		int i;
 		try {
 			String txt = textInput.getText();
-			String output = "";
+			if(output == null) {
+				output = "";
+		    } else if(output.length() > 0) {		
+				if(output.charAt((output.length() -1)) != ',' && 
+					txt.charAt(0)!= ',') {
+				   output += ",";
+				}
+			}
 			for (i=0; i < txt.length(); i++) {
-				//if input is a comma or number, add it to output
-				if(txt.charAt(i) == ',' && i != 0) {
-					output += txt.charAt(i);
-				} else if(Utility.isNum(txt.charAt(i))) {
-					output += txt.charAt(i);
+				char cchar = txt.charAt(i);
+				if(cchar == ',' && i != 0) {
+					output += cchar;
+				} else if(Utility.isNum(cchar)) {
+					output += cchar; //adds digits to a temp string for purposes of bound checking
 				} else {
 					JOptionPane.showMessageDialog(null,"Invalid input!");
 					return;
 				}
 			}
 			sInputs = output.split(",");
-			iInputs = new ArrayList<Object>();
 	
 			for (i=0; i < sInputs.length; i++) {
+				if(!Utility.inBounds(Integer.parseInt(sInputs[i]))) {
+					JOptionPane.showMessageDialog(null,"Input "+sInputs[i]+" is not within bounds!");
+					return;
+				}
 				iInputs.add(Integer.parseInt(sInputs[i]));
 			}
+			System.out.println(iInputs);
 		
-			cInput.setText(output);	
+			textInput.setText("");
+			String temp = Utility.join(",",sInputs);
+			cInput.setText(temp);	
 		} catch(Exception e) {
 			JOptionPane.showMessageDialog(null,"Input text first!");
 			return;
@@ -166,13 +181,17 @@ class GUI extends JPanel implements ActionListener {
 
 	private void clearText() {
 		textInput.setText("");
+		iInputs.clear();
+		cInput.setText("");
+		output = "";
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		switch(e.getActionCommand()) {
 			case "Enter":  textEntered();
 						   break;
-			case "Submit": System.out.println("nothing");
+			case "Submit": vis.setInputs(iInputs);
+						   clearText();
 						   break;
 			case "Clear":  clearText();
 						   break;

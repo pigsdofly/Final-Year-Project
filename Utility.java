@@ -11,4 +11,24 @@ class Utility {
 		}
 		return true;
 	}
+
+	static Boolean inBounds(int i) {
+		System.out.println(i);
+		if(i > 255 || i < 0) 
+			return false;
+		else
+			return true;
+	}
+
+	static String join(String glue,String[] arr) {
+		int i;
+		String result = "";
+		for(i=0; i < arr.length; i++) {
+			if(i == arr.length - 1)
+				result += arr[i];
+			else
+				result += arr[i] + glue;
+		}
+		return result;
+	}
 }

@@ -1,12 +1,13 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.util.ArrayList;
 
 class Visualisation {
 	
 	private Dimension vSize;
 	private int rectX;
 	private int rectY;
+	private ArrayList<Integer> inputs;
 
 	public Visualisation(Dimension vSize) {
 		updateSize(vSize);
@@ -15,6 +16,14 @@ class Visualisation {
 	public void updateSize(Dimension vSize) {
 		this.vSize = vSize;
 		setRect();
+	}
+
+	public void setInputs(ArrayList<Integer> inputs) {
+		if (inputs.size() == 0) {
+			JOptionPane.showMessageDialog(null,"No inputs!");
+			return;
+		}
+		this.inputs = inputs;
 	}
 
 	public void setRect() {
