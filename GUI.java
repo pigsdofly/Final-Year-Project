@@ -18,8 +18,9 @@ class GUI extends JPanel implements ActionListener {
 	
 	private GridBagConstraints c;	        //constraints for sidebar, visual 
 										    //and inputs respectively
-	private int w, h;
+	private int w, x,x1,y1,y2,isize,div;
 	private int xoff; 					    // x offset for visualisation
+	private int[][] dimensions,points;
 	private String output;
 	private String[] sInputs;
     private boolean submitting = false;
@@ -30,46 +31,53 @@ class GUI extends JPanel implements ActionListener {
 	
 	public GUI(int w, int h) {
 	//default constructor for the GUI
-	//	super();
-		this.w = w;
-		this.h = h;
 		this.setSize(w,h);
 		setupLayout();
 
 		vis	= new Visualisation(visual.getSize());
 		//repaint();
 	}
+
+	private void initVis() {
+		//initializes all variables used in drawing
+		vis.updateSize(visual.getSize());
+		xoff = sidebar.getSize().width;
+		x = vis.getRectX() + xoff;
+        x1 = x/7;
+        y2 = vis.getRectY();
+        y1 = y2/10;//variables named after order of use
+        w = vis.getCircWidth();
+		isize = iInputs.size();
+		
+        double divider = x*0.75;
+        div = (int) divider;
+		
+		dimensions = vis.getPoly(xoff);
+		points = new int[isize][2];
+	}
+	
 	@Override
 	public void paint(Graphics g) {
 	//overriden JComponent paint function
 		super.paint(g);
 		Graphics2D g2 = (Graphics2D) g;
-		drawing(g2);
-	}
-
-	private void drawing(Graphics2D g2) {
-	//function to handle the actual drawing of images
-		vis.updateSize(visual.getSize());
-		xoff = sidebar.getSize().width;
-        int pointX;
-		int x = vis.getRectX() + xoff;
-        int x1 = x/7;
-        int y2 = vis.getRectY();
-        int y1 = y2/10;//variables named after order of use
-        int w = vis.getCircWidth();
-        double divider = x*0.75;
-        int div = (int) divider;
-		int[][] dimensions = vis.getPoly(xoff);
-		double unit = ((x+10) - (div+20)) / 127.0; //amount of distance betweens unit on the graph
+		initVis();
+		double unit = ((x+10) - (div+20)) / 127.0; //amount of distance between units on the graph
         
         
         if(submitting == true) {
             for(int i = 0;i<iInputs.size();i++) {
-                pointX = (int)((unit*iInputs.get(i))+div+20);
-                System.out.println(pointX);
+                int pointX = (int)((unit*iInputs.get(i))+div+20);
+				int pointY = y1+20+((i+1)*30);
+				points[i][0] = pointX;
+				points[i][1] = pointY;
+				
+				//converting the individual entries into an x coordinate
                 String iStr = iInputs.get(i) + "";
+
                 g2.drawString(iStr,pointX,y1+15);
                 g2.drawLine(pointX,y1+20,pointX,y1+40);
+				g2.fillOval(pointX-5,pointY,10,10);
             }
             clearText();
         }
@@ -77,9 +85,16 @@ class GUI extends JPanel implements ActionListener {
         g2.drawLine(div+20,y1+30,x+10,y1+30);
 		g2.drawRect(x1,y1,(int)(x*0.9),y2); //main body of the HDD
 		g2.drawOval(x1,y1,w,y2); //The disk plate
-		g2.drawPolygon(dimensions[0],dimensions[1],3);//The disk head
-        
+		g2.drawPolygon(dimensions[0],dimensions[1],3);//The disk head)
+		if(points.length > 0)
+			animations(g2,points);//nothing yet
+	}
 
+	private void animations(Graphics2D g2,int points[][]) {
+		//function for the animations
+		//what does it need to know
+		//array of coordinates for points
+		int i;
 	}
 
 	private void setupLayout() {
