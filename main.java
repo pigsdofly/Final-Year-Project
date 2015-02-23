@@ -2,8 +2,8 @@ import javax.swing.*;
 import java.lang.Exception;
 
 public class main {
-	private static final int w = 640;
-	private static final int h = 480;
+	private static final int w = 1024;
+	private static final int h = 768;
 	public static void main(String[] args) {
 		try {
 			UIManager.setLookAndFeel(
@@ -18,17 +18,16 @@ public class main {
 					} 
 			} //hacky way of getting look and feel working with GTK+
 		} catch (Exception e) {
-			return;
+			System.exit(0);
 		}	
-		
 		JFrame frame = new JFrame();
-		frame.setVisible(true);
 		frame.setSize(w,h);
 		frame.setTitle("Algorithm Visualisation");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		GUI g = new GUI(w,h);
 		frame.add(g);
-
+        frame.setResizable(false);
+        frame.setVisible(true);
 	}
 }

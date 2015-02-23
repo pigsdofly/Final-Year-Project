@@ -14,7 +14,7 @@ class Utility {
 
 	static Boolean inBounds(int i) {
 		System.out.println(i);
-		if(i > 255 || i < 0) 
+		if(i > 127 || i < 0) 
 			return false;
 		else
 			return true;

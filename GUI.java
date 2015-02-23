@@ -22,8 +22,10 @@ class GUI extends JPanel implements ActionListener {
 	private int xoff; 					    // x offset for visualisation
 	private String output;
 	private String[] sInputs;
-	public ArrayList<Integer> iInputs = new ArrayList<Integer>();
-
+    private boolean submitting = false;
+    public ArrayList<Integer> iInputs = new ArrayList<Integer>();
+    
+    
 	private Visualisation vis;
 	
 	public GUI(int w, int h) {
@@ -35,28 +37,49 @@ class GUI extends JPanel implements ActionListener {
 		setupLayout();
 
 		vis	= new Visualisation(visual.getSize());
-		repaint();
+		//repaint();
 	}
 	@Override
 	public void paint(Graphics g) {
+	//overriden JComponent paint function
 		super.paint(g);
 		Graphics2D g2 = (Graphics2D) g;
 		drawing(g2);
 	}
 
 	private void drawing(Graphics2D g2) {
+	//function to handle the actual drawing of images
 		vis.updateSize(visual.getSize());
 		xoff = sidebar.getSize().width;
-		int x = vis.getRectX();
-		int y = vis.getRectY();
+        int pointX;
+		int x = vis.getRectX() + xoff;
+        int x1 = x/7;
+        int y2 = vis.getRectY();
+        int y1 = y2/10;//variables named after order of use
+        int w = vis.getCircWidth();
+        double divider = x*0.75;
+        int div = (int) divider;
+		int[][] dimensions = vis.getPoly(xoff);
+		double unit = ((x+10) - (div+20)) / 127.0; //amount of distance betweens unit on the graph
+        
+        
+        if(submitting == true) {
+            for(int i = 0;i<iInputs.size();i++) {
+                pointX = (int)((unit*iInputs.get(i))+div+20);
+                System.out.println(pointX);
+                String iStr = iInputs.get(i) + "";
+                g2.drawString(iStr,pointX,y1+15);
+                g2.drawLine(pointX,y1+20,pointX,y1+40);
+            }
+            clearText();
+        }
+        g2.drawLine(div,y1,div,y2+30);
+        g2.drawLine(div+20,y1+30,x+10,y1+30);
+		g2.drawRect(x1,y1,(int)(x*0.9),y2); //main body of the HDD
+		g2.drawOval(x1,y1,w,y2); //The disk plate
+		g2.drawPolygon(dimensions[0],dimensions[1],3);//The disk head
+        
 
-		double width = x * 0.4;
-
-		int w = (int) width;
-
-		g2.drawRect(x/7,y/10,x - xoff,y);
-		g2.drawOval(x/5,y/10,w,y);
-	
 	}
 
 	private void setupLayout() {
@@ -75,11 +98,21 @@ class GUI extends JPanel implements ActionListener {
 		JButton FCFS = new JButton("FCFS");
 		JButton SSTF = new JButton("SSTF");
 		JButton SCAN = new JButton("SCAN");
+		JButton CSCAN = new JButton("C-SCAN");
+		JButton CLOOK = new JButton("C-LOOK");
 
-		sidebar.setLayout(new GridLayout(4,2));
+		FCFS.addActionListener(this);
+		SSTF.addActionListener(this);
+		SCAN.addActionListener(this);
+		CSCAN.addActionListener(this);
+		CLOOK.addActionListener(this);
+
+		sidebar.setLayout(new GridLayout(5,1));
 		sidebar.add(FCFS);
 		sidebar.add(SSTF);
 		sidebar.add(SCAN);
+		sidebar.add(CSCAN);
+		sidebar.add(CLOOK);
 	
 		this.add(sidebar,BorderLayout.WEST);
 		
@@ -89,7 +122,7 @@ class GUI extends JPanel implements ActionListener {
 	private void centerSetup() {
 	//setup for everything that isn't the sidebar
 		visual = new JPanel(); //Panel for the visualisation
-		
+		visual.add(new JLabel("Visualisation: (HDD/Graph)"));
 		inputfield = new JPanel();
 		inputfield.setLayout(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -104,7 +137,7 @@ class GUI extends JPanel implements ActionListener {
 		
 		c.gridx = 0;
 		c.gridy = 1;
-		inputfield.add(new JLabel("Enter a list of numbers (between 1 and 255) separated by commas:"),c);
+		inputfield.add(new JLabel("Enter a list of numbers (between 0 and 127) separated by commas:"),c);
 		
 		textInput = new JTextField(20);
 		c.gridx = 0;
@@ -159,6 +192,7 @@ class GUI extends JPanel implements ActionListener {
 				   output += ",";
 				}
 			}
+			String oldoutput = output;
 			for (i=0; i < txt.length(); i++) {
 				char cchar = txt.charAt(i);
 				if(cchar == ',' && i != 0) {
@@ -171,10 +205,11 @@ class GUI extends JPanel implements ActionListener {
 				}
 			}
 			sInputs = output.split(",");
-	
+            iInputs.clear();
 			for (i=0; i < sInputs.length; i++) {
 				if(!Utility.inBounds(Integer.parseInt(sInputs[i]))) {
 					JOptionPane.showMessageDialog(null,"Input "+sInputs[i]+" is not within bounds!");
+					output = oldoutput;
 					return;
 				}
 				iInputs.add(Integer.parseInt(sInputs[i]));
@@ -196,17 +231,39 @@ class GUI extends JPanel implements ActionListener {
 		iInputs.clear();
 		cInput.setText("");
 		output = "";
+        submitting = false;
 	}
+    
+    private void submitInputs() {
+        if(cInput.getText().length() != 0) {
+            vis.setInputs(iInputs);
+            submitting = true;
+            repaint();
+        } else {
+            JOptionPane.showMessageDialog(null,"Input text first!");
+        }
+    }
 
 	public void actionPerformed(ActionEvent e) {
+	//actionlistener, switch based on jbutton text
 		switch(e.getActionCommand()) {
 			case "Enter":  textEntered();
 						   break;
-			case "Submit": vis.setInputs(iInputs);
-						   clearText();
+			case "Submit": submitInputs();
 						   break;
 			case "Clear":  clearText();
+                           repaint();
 						   break;
+			case "FCFS": vis.changeMode(0);
+						 break;
+			case "SSTF": vis.changeMode(1);
+						 break;
+			case "SCAN": vis.changeMode(2);
+						 break;
+			case "C-SCAN":vis.changeMode(3); 
+						  break;
+			case "C-LOOK":vis.changeMode(4);
+						  break;
 			default: System.out.println("How?");
 		}
 	}
