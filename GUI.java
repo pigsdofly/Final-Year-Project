@@ -42,7 +42,6 @@ class GUI extends JPanel implements ActionListener {
 		setupLayout();
 
 		vis	= new Visualisation(visual.getSize());
-		//repaint();
 	}
 
 	private void initVis() {
@@ -110,10 +109,12 @@ class GUI extends JPanel implements ActionListener {
 				
 				//converting the individual entries into an x coordinate
                 String iStr = iInputs.get(i) + "";
+				String mStr = "Total head movements: "+Utility.countMovements(iInputs);
 
                 g2.drawString(iStr,pointX,y1+15);
                 g2.drawLine(pointX,y1+20,pointX,y1+40);
 				g2.fillOval(pointX-5,pointY-5,10,10);
+				g2.drawString(mStr,div+30,y2-20);
             }
 			if(!vis.action)
             	clearText();
@@ -153,6 +154,7 @@ class GUI extends JPanel implements ActionListener {
 		System.out.println(sleepTime);
 		Utility.sleep(sleepTime);	
 		repaint();
+		return;
 	}
 
 	private void setupLayout() {

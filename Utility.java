@@ -34,7 +34,7 @@ class Utility {
 	}
 
 	static ArrayList<Integer> sort(int cmode,ArrayList<Integer> inputs) {
-		System.out.println("Nothing");
+		
 		return inputs;
 	}
 	
@@ -59,4 +59,16 @@ class Utility {
 			sT = sleepTime - (t1 - t0);
 		}
 	}
+
+	static int countMovements(ArrayList<Integer> inputs) {
+		int movements = 0;
+		for(int i=0; i < inputs.size() -1;i++) {
+			if(inputs.get(i) > inputs.get(i+1))
+				movements += inputs.get(i) - inputs.get(i+1);
+			else
+				movements += inputs.get(i+1) - inputs.get(i);
+		}
+		return movements;
+
+		}
 }
