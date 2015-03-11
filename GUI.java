@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 /* Class for all GUI setup */
 
@@ -13,7 +14,7 @@ class GUI extends JPanel implements ActionListener {
 											//and input space
 	private JLabel cInput;
 	private JTextField textInput;
-	private JButton enter,submit,clear;
+	private JButton enter,submit,clear,random;
 
 	
 	private GridBagConstraints c;	        //constraints for sidebar, visual 
@@ -30,7 +31,6 @@ class GUI extends JPanel implements ActionListener {
     private Graphics2D g2;
 
 	public ArrayList<Integer> iInputs = new ArrayList<Integer>();
-	public ArrayList<Integer> iInputs2;
 
     
     
@@ -54,9 +54,12 @@ class GUI extends JPanel implements ActionListener {
         y2 = vis.getRectY();
         y1 = y2/10;//variables named after order of use
         w = vis.getCircWidth();
-		w2 = (x1 / 127.0);
+
 		isize = iInputs.size();
+
+		w2 = (x1 / 127.0); //disk divided into units
 		unit = ((x+10) - (div+20)) / 127.0; 
+		//amount of distance between units on the graph
 		
         double divider = x*0.75;
         div = (int) divider;
@@ -65,6 +68,7 @@ class GUI extends JPanel implements ActionListener {
 		points = new int[isize][2];
 		if(!dpinit)
 			initDonePoints();
+			
 		if(!vis.action)
 			dimensions = vis.getPoly(0);
 		else if(vis.action && !donePoints[0]) {
@@ -90,7 +94,6 @@ class GUI extends JPanel implements ActionListener {
 		super.paint(g);
 		g2 = (Graphics2D) g;
 		initVis();
-		//amount of distance between units on the graph
 		g2.setColor(Color.BLACK);
         
         if(submitting == true) {
@@ -110,11 +113,9 @@ class GUI extends JPanel implements ActionListener {
 
                 g2.drawString(iStr,pointX,y1+15);
                 g2.drawLine(pointX,y1+20,pointX,y1+40);
-				g2.fillOval(pointX-5,pointY,10,10);
+				g2.fillOval(pointX-5,pointY-5,10,10);
             }
-			if(vis.action)
-				iInputs2 = Utility.copyAL(iInputs);
-		    else	
+			if(!vis.action)
             	clearText();
         }
 
@@ -131,35 +132,27 @@ class GUI extends JPanel implements ActionListener {
 			}
 		}
 		if(vis.action) {
-			if(donePoints[donePoints.length-1])
-				vis.action = false;
-			else
-				animations();
+			animations();
 		}
 	}
 
 	private void animations() {
-		int sleepTime = donePoints[0] ? 1000 : 0;
-		int i = Utility.checkPoints(donePoints);
-		iInputs = Utility.copyAL(iInputs2);
+		int i = Utility.checkPoints(donePoints);//i is the next point to be snapped to
+		int sleepTime;
+		//snap the disk head location straight to the default, otherwise wait
+		if(donePoints[0]) 
+			sleepTime = 1000;
+		else
+			sleepTime = 0;
+	
 		vis.action = true;
 
 		dimensions = vis.getPoly(iInputs.get(i)*w2);
 		donePoints[i] = true;
-		System.out.println(iInputs.get(i));
-
-		
-		try {
-			Thread.sleep(sleepTime);
-		} catch(Exception e) {
-		}
-		if(vis.action)	
-			repaint();
-		else {
-			repaint();
-			iInputs2.clear();
-			clearText();
-		}
+		System.out.println(i);
+		System.out.println(sleepTime);
+		Utility.sleep(sleepTime);	
+		repaint();
 	}
 
 	private void setupLayout() {
@@ -200,7 +193,7 @@ class GUI extends JPanel implements ActionListener {
 	}
 
 	private void centerSetup() {
-	//setup for everything that isn't the sidebar
+	//setup for rest of the window
 		visual = new JPanel(); //Panel for the visualisation
 		visual.add(new JLabel("Visualisation: (HDD/Graph)"));
 		inputfield = new JPanel();
@@ -225,11 +218,20 @@ class GUI extends JPanel implements ActionListener {
 		c.ipadx = 5;
 		inputfield.add(textInput,c);
 
+		JPanel enterP = new JPanel();
+
+		enterP.setLayout(new GridLayout(1,2));
 		enter = new JButton("Enter");
 		enter.addActionListener(this);
+		enterP.add(enter);
+
+		random = new JButton("Random");
+		random.addActionListener(this);
+		enterP.add(random);
+
 		c.gridx = 0;
 		c.gridy = 3;
-		inputfield.add(enter,c);
+		inputfield.add(enterP,c);
 
 		cInput = new JLabel("");
 		c.gridx = 1;
@@ -257,6 +259,21 @@ class GUI extends JPanel implements ActionListener {
 		center.add(inputfield);
 
 		this.add(center,BorderLayout.CENTER);
+	}
+	private void addRandom() {
+	//creates 5 random numbers to add to output
+		Random r = new Random();		
+		int[] rands = {r.nextInt(128),r.nextInt(128),r.nextInt(128),r.nextInt(128),r.nextInt(128)}; 
+		String rString = "";
+		for(int i=0;i<rands.length;i++) {
+			iInputs.add(rands[i]);
+			rString += ""+rands[i];
+			if(!(i == rands.length -1)) {
+				rString += ",";
+			}
+		}
+		cInput.setText(rString);
+
 	}
 
 	private void textEntered() {
@@ -335,6 +352,8 @@ class GUI extends JPanel implements ActionListener {
 						   break;
 			case "Clear":  clearText();
                            repaint();
+						   break;
+			case "Random": addRandom();
 						   break;
 			case "FCFS": vis.changeMode(0);
 						 break;

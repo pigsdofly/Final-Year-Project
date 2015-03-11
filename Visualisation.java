@@ -72,7 +72,7 @@ class Visualisation {
 		int[][] dimensions = {{centerX,(int)(rectX*0.7), (int)(rectX*0.8)},{centerY,rectY+20, rectY}};
         //dimensions for triangle representing disk head
 	
-		System.out.println(centerX);
+		System.out.println("centerX: "+centerX);
 
 		return dimensions;	
 	}
