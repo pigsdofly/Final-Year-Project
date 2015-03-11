@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 class Visualisation {
 	
-	private int cmode; //current mode. Not static because visualisation object should only be made once
+	public int cmode; //current mode. Not static because visualisation object should only be made once
 	private String[] modes = {"FCFS","SSTF","SCAN","C-SCAN","C-LOOK"};
     public boolean action = false; //boolean for if animation is happening
 
@@ -27,9 +27,6 @@ class Visualisation {
 		if (inputs.size() == 0) {
 			JOptionPane.showMessageDialog(null,"No inputs!");
 			return;
-		}
-		if (cmode != 0) {
-			Utility.sort(cmode,inputs);
 		}
 		this.inputs = inputs;
 	}

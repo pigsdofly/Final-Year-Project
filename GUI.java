@@ -336,6 +336,7 @@ class GUI extends JPanel implements ActionListener {
     private void submitInputs() {
         if(cInput.getText().length() != 0) {
 			dpinit = false;
+			iInputs = Utility.sort(vis.cmode,iInputs);
             vis.setInputs(iInputs);
 			vis.action = true;
             submitting = true;

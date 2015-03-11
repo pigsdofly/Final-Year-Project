@@ -34,6 +34,9 @@ class Utility {
 	}
 
 	static ArrayList<Integer> sort(int cmode,ArrayList<Integer> inputs) {
+		if(cmode == 0)
+			return inputs;
+		
 		
 		return inputs;
 	}
