@@ -1,4 +1,5 @@
 import java.lang.Exception;
+import java.util.ArrayList;
 class Utility {
 	public Utility() {
 	}
@@ -30,5 +31,26 @@ class Utility {
 				result += arr[i] + glue;
 		}
 		return result;
+	}
+
+	static ArrayList<Integer> sort(int cmode,ArrayList<Integer> inputs) {
+		System.out.println("Nothing");
+		return inputs;
+	}
+	
+	static int checkPoints(boolean[] donePoints) {
+		for(int i=0;i<donePoints.length;i++) {
+			if(!donePoints[i])
+				return i;
+		}
+		return donePoints.length -1;
+	}
+
+	static ArrayList<Integer> copyAL(ArrayList<Integer> inputs) {
+		ArrayList<Integer> output = new ArrayList<Integer>();
+		for(int i = 0; i< inputs.size();i++) {
+			output.add(inputs.get(i));
+		}
+		return output;
 	}
 }

@@ -20,11 +20,18 @@ class GUI extends JPanel implements ActionListener {
 										    //and inputs respectively
 	private int w, x,x1,y1,y2,isize,div;
 	private int xoff; 					    // x offset for visualisation
+	private double w2,unit;
+	private boolean dpinit = false;
 	private int[][] dimensions,points;
+	private boolean[] donePoints;
 	private String output;
 	private String[] sInputs;
     private boolean submitting = false;
-    public ArrayList<Integer> iInputs = new ArrayList<Integer>();
+    private Graphics2D g2;
+
+	public ArrayList<Integer> iInputs = new ArrayList<Integer>();
+	public ArrayList<Integer> iInputs2;
+
     
     
 	private Visualisation vis;
@@ -47,28 +54,54 @@ class GUI extends JPanel implements ActionListener {
         y2 = vis.getRectY();
         y1 = y2/10;//variables named after order of use
         w = vis.getCircWidth();
+		w2 = (x1 / 127.0);
 		isize = iInputs.size();
+		unit = ((x+10) - (div+20)) / 127.0; 
 		
         double divider = x*0.75;
         div = (int) divider;
 		
-		dimensions = vis.getPoly(xoff);
+			
 		points = new int[isize][2];
+		if(!dpinit)
+			initDonePoints();
+		if(!vis.action)
+			dimensions = vis.getPoly(0);
+		else if(vis.action && !donePoints[0]) {
+			dimensions = vis.getPoly(iInputs.get(0) *w2);
+		}
+		try{	
+			if(donePoints[donePoints.length-1])
+				vis.action = false;
+		} catch(Exception e) {}
+
+	}
+	private void initDonePoints() {	
+		donePoints = new boolean[isize];
+		for(int i=0;i<isize;i++) {
+			donePoints[i] = false;
+		}
+		dpinit = true;
 	}
 	
 	@Override
 	public void paint(Graphics g) {
 	//overriden JComponent paint function
 		super.paint(g);
-		Graphics2D g2 = (Graphics2D) g;
+		g2 = (Graphics2D) g;
 		initVis();
-		double unit = ((x+10) - (div+20)) / 127.0; //amount of distance between units on the graph
-        
+		//amount of distance between units on the graph
+		g2.setColor(Color.BLACK);
         
         if(submitting == true) {
             for(int i = 0;i<iInputs.size();i++) {
                 int pointX = (int)((unit*iInputs.get(i))+div+20);
+				//gets x coordinate of the point by multiplying the number by 
+				//unit size and adding that to the divider's x coordinate.
+				
 				int pointY = y1+20+((i+1)*30);
+				//orders points by the current value of i 
+				
 				points[i][0] = pointX;
 				points[i][1] = pointY;
 				
@@ -79,22 +112,54 @@ class GUI extends JPanel implements ActionListener {
                 g2.drawLine(pointX,y1+20,pointX,y1+40);
 				g2.fillOval(pointX-5,pointY,10,10);
             }
-            clearText();
+			if(vis.action)
+				iInputs2 = Utility.copyAL(iInputs);
+		    else	
+            	clearText();
         }
+
         g2.drawLine(div,y1,div,y2+30);
         g2.drawLine(div+20,y1+30,x+10,y1+30);
 		g2.drawRect(x1,y1,(int)(x*0.9),y2); //main body of the HDD
 		g2.drawOval(x1,y1,w,y2); //The disk plate
 		g2.drawPolygon(dimensions[0],dimensions[1],3);//The disk head)
-		if(points.length > 0)
-			animations(g2,points);//nothing yet
+
+		if(points.length > 0) {
+			for(int i=0;i<(points.length-1);i++) {
+				g2.drawLine(points[i][0],points[i][1],
+							points[i+1][0],points[i+1][1]);
+			}
+		}
+		if(vis.action) {
+			if(donePoints[donePoints.length-1])
+				vis.action = false;
+			else
+				animations();
+		}
 	}
 
-	private void animations(Graphics2D g2,int points[][]) {
-		//function for the animations
-		//what does it need to know
-		//array of coordinates for points
-		int i;
+	private void animations() {
+		int sleepTime = donePoints[0] ? 1000 : 0;
+		int i = Utility.checkPoints(donePoints);
+		iInputs = Utility.copyAL(iInputs2);
+		vis.action = true;
+
+		dimensions = vis.getPoly(iInputs.get(i)*w2);
+		donePoints[i] = true;
+		System.out.println(iInputs.get(i));
+
+		
+		try {
+			Thread.sleep(sleepTime);
+		} catch(Exception e) {
+		}
+		if(vis.action)	
+			repaint();
+		else {
+			repaint();
+			iInputs2.clear();
+			clearText();
+		}
 	}
 
 	private void setupLayout() {
@@ -152,7 +217,7 @@ class GUI extends JPanel implements ActionListener {
 		
 		c.gridx = 0;
 		c.gridy = 1;
-		inputfield.add(new JLabel("Enter a list of numbers (between 0 and 127) separated by commas:"),c);
+		inputfield.add(new JLabel("Enter a list of numbers (between 0 and 127) separated by commas (first number is disk head starting position):"),c);
 		
 		textInput = new JTextField(20);
 		c.gridx = 0;
@@ -251,7 +316,9 @@ class GUI extends JPanel implements ActionListener {
     
     private void submitInputs() {
         if(cInput.getText().length() != 0) {
+			dpinit = false;
             vis.setInputs(iInputs);
+			vis.action = true;
             submitting = true;
             repaint();
         } else {
@@ -279,7 +346,6 @@ class GUI extends JPanel implements ActionListener {
 						  break;
 			case "C-LOOK":vis.changeMode(4);
 						  break;
-			default: System.out.println("How?");
 		}
 	}
 }

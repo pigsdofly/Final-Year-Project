@@ -6,10 +6,10 @@ class Visualisation {
 	
 	private int cmode; //current mode. Not static because visualisation object should only be made once
 	private String[] modes = {"FCFS","SSTF","SCAN","C-SCAN","C-LOOK"};
-    private boolean action = false; //boolean for if animation is happening
+    public boolean action = false; //boolean for if animation is happening
 
 	private Dimension vSize;
-	private int rectX, rectY,circX,graphX,graphY;
+	private int rectX, rectY,circX,graphX,graphY,centerX,centerY;
 	private ArrayList<Integer> inputs;
 
 	public Visualisation(Dimension vSize) {
@@ -27,6 +27,9 @@ class Visualisation {
 		if (inputs.size() == 0) {
 			JOptionPane.showMessageDialog(null,"No inputs!");
 			return;
+		}
+		if (cmode != 0) {
+			Utility.sort(cmode,inputs);
 		}
 		this.inputs = inputs;
 	}
@@ -63,12 +66,15 @@ class Visualisation {
     
 
 
-	public int[][] getPoly(int xoff) {
-		int centerX = (int) (rectX * 0.4);
-        int centerY = (rectY + (rectY/10))/2;
-        int[][] dimensions = {{centerX,(int)(rectX*0.7), (int)(rectX*0.8)},{centerY,rectY+20, rectY}};
+	public int[][] getPoly(double u) {
+		centerX = (int) (rectX * 0.4) +(int) u - 5;
+        centerY = (rectY + (rectY/10))/2;
+		int[][] dimensions = {{centerX,(int)(rectX*0.7), (int)(rectX*0.8)},{centerY,rectY+20, rectY}};
         //dimensions for triangle representing disk head
+	
+		System.out.println(centerX);
 
 		return dimensions;	
 	}
+
 }
