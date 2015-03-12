@@ -49,20 +49,6 @@ class Utility {
 		return donePoints.length -1;
 	}
 
-	static void sleep(int sleepTime) {
-		long t0 = System.currentTimeMillis();
-		long sT = sleepTime;
-		while(sT > 0) {
-			try{
-				Thread.sleep(sT);
-			} catch(Exception e){
-				System.out.println("error sleeping!");
-			}
-			long t1 = System.currentTimeMillis();
-			sT = sleepTime - (t1 - t0);
-		}
-	}
-
 	static int countMovements(ArrayList<Integer> inputs) {
 		int movements = 0;
 		for(int i=0; i < inputs.size() -1;i++) {

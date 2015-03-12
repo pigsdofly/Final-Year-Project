@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
@@ -21,6 +22,7 @@ class GUI extends JPanel implements ActionListener {
 										    //and inputs respectively
 	private int w, x,x1,y1,y2,isize,div;
 	private int xoff; 					    // x offset for visualisation
+	private int sleepTime = 0;
 	private double w2,unit;
 	private boolean dpinit = false;
 	private int[][] dimensions,points;
@@ -30,14 +32,15 @@ class GUI extends JPanel implements ActionListener {
     private boolean submitting = false;
     private Graphics2D g2;
 
-	public ArrayList<Integer> iInputs = new ArrayList<Integer>();
+	private Timer timer;
 
-    
+	public ArrayList<Integer> iInputs = new ArrayList<Integer>();
     
 	private Visualisation vis;
 	
 	public GUI(int w, int h) {
 	//default constructor for the GUI
+		super();
 		this.setSize(w,h);
 		setupLayout();
 
@@ -74,8 +77,10 @@ class GUI extends JPanel implements ActionListener {
 			dimensions = vis.getPoly(iInputs.get(0) *w2);
 		}
 		try{	
-			if(donePoints[donePoints.length-1])
+			if(donePoints[donePoints.length-1]) {
 				vis.action = false;
+				timer.stop();
+			}
 		} catch(Exception e) {}
 
 	}
@@ -132,34 +137,26 @@ class GUI extends JPanel implements ActionListener {
 							points[i+1][0],points[i+1][1]);
 			}
 		}
-		if(vis.action) {
-			animations();
-		}
 	}
 
-	private void animations() {
+	public void update(Graphics g) {
+		paint(g);
+	}
+
+	private void animations() { 
 		int i = Utility.checkPoints(donePoints);//i is the next point to be snapped to
-		int sleepTime;
-		//snap the disk head location straight to the default, otherwise wait
-		if(donePoints[0]) 
-			sleepTime = 1000;
-		else
-			sleepTime = 0;
 	
 		vis.action = true;
 
 		dimensions = vis.getPoly(iInputs.get(i)*w2);
 		donePoints[i] = true;
 		System.out.println(i);
-		System.out.println(sleepTime);
-		Utility.sleep(sleepTime);	
 		repaint();
-		return;
 	}
 
 	private void setupLayout() {
 	//sets up layout for program
-		this.setLayout(new BorderLayout());
+		setLayout(new BorderLayout());
 		
 		//setup split into multiple functions to make code cleaner
 		sidebarSetup();
@@ -264,6 +261,7 @@ class GUI extends JPanel implements ActionListener {
 	}
 	private void addRandom() {
 	//creates 5 random numbers to add to output
+		clearText();
 		Random r = new Random();		
 		int[] rands = {r.nextInt(128),r.nextInt(128),r.nextInt(128),r.nextInt(128),r.nextInt(128)}; 
 		String rString = "";
@@ -334,13 +332,20 @@ class GUI extends JPanel implements ActionListener {
 	}
     
     private void submitInputs() {
+	//sets all the flags for animating, then begins animation timer
         if(cInput.getText().length() != 0) {
 			dpinit = false;
 			iInputs = Utility.sort(vis.cmode,iInputs);
             vis.setInputs(iInputs);
 			vis.action = true;
             submitting = true;
-            repaint();
+			repaint();
+
+			timer = new Timer(1000,this);
+			//create a timer that waits a second between animations
+			timer.setInitialDelay(0);
+			//will run immediately at first
+			timer.start();
         } else {
             JOptionPane.showMessageDialog(null,"Input text first!");
         }
@@ -348,26 +353,31 @@ class GUI extends JPanel implements ActionListener {
 
 	public void actionPerformed(ActionEvent e) {
 	//actionlistener, switch based on jbutton text
-		switch(e.getActionCommand()) {
-			case "Enter":  textEntered();
-						   break;
-			case "Submit": submitInputs();
-						   break;
-			case "Clear":  clearText();
-                           repaint();
-						   break;
-			case "Random": addRandom();
-						   break;
-			case "FCFS": vis.changeMode(0);
-						 break;
-			case "SSTF": vis.changeMode(1);
-						 break;
-			case "SCAN": vis.changeMode(2);
-						 break;
-			case "C-SCAN":vis.changeMode(3); 
-						  break;
-			case "C-LOOK":vis.changeMode(4);
-						  break;
+		try {
+			switch(e.getActionCommand()) {
+				case "Enter":  textEntered();
+							   break;
+				case "Submit": submitInputs();
+							   break;
+				case "Clear":  clearText();
+   	        	               repaint();
+							   break;
+				case "Random": addRandom();
+							   break;
+				case "FCFS": vis.changeMode(0);
+							 break;
+				case "SSTF": vis.changeMode(1);
+							 break;
+				case "SCAN": vis.changeMode(2);
+							 break;
+				case "C-SCAN":vis.changeMode(3); 
+							  break;
+				case "C-LOOK":vis.changeMode(4);
+							  break;
+			}
+		} catch(Exception ex) {
+		//this is horrible, but it works
+			animations();
 		}
 	}
 }
