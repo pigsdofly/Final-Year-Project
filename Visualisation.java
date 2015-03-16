@@ -5,7 +5,8 @@ import java.util.ArrayList;
 class Visualisation {
 	
 	public int cmode; //current mode. Not static because visualisation object should only be made once
-	private String[] modes = {"FCFS","SSTF","SCAN","C-SCAN","C-LOOK"};
+	private String[] modes = {"First Come First Serve","Shortest Seek Time First",
+							  "SCAN","Circular-SCAN","C-LOOK"};
     public boolean action = false; //boolean for if animation is happening
 
 	private Dimension vSize;

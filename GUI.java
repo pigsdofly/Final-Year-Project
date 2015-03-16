@@ -114,19 +114,29 @@ class GUI extends JPanel implements ActionListener {
 				
 				//converting the individual entries into an x coordinate
                 String iStr = iInputs.get(i) + "";
-				String mStr = "Total head movements: "+Utility.countMovements(iInputs);
 
                 g2.drawString(iStr,pointX,y1+15);
                 g2.drawLine(pointX,y1+20,pointX,y1+40);
 				g2.fillOval(pointX-5,pointY-5,10,10);
-				g2.drawString(mStr,div+30,y2-20);
             }
+			
+			String mStr = "Total head movements: "+Utility.countMovements(iInputs);
+			g2.drawString(mStr,div+30,y2-20);
+			String inputString = "Requests: ";
+			inputString += Utility.queueToString(iInputs,donePoints,false);
+
+			String qString = "Queue: ";
+			qString += Utility.queueToString(iInputs,donePoints,true);
+
+			g2.drawString(inputString,div+30,y2-5);
+			g2.drawString(qString,div+30,y2+10);
+			
 			if(!vis.action)
             	clearText();
         }
 
-        g2.drawLine(div,y1,div,y2+30);
-        g2.drawLine(div+20,y1+30,x+10,y1+30);
+        g2.drawLine(div,y1,div,y2+30);//line to divide graph and HDD sections
+        g2.drawLine(div+20,y1+30,x+10,y1+30);//line for graph
 		g2.drawRect(x1,y1,(int)(x*0.9),y2); //main body of the HDD
 		g2.drawOval(x1,y1,w,y2); //The disk plate
 		g2.drawPolygon(dimensions[0],dimensions[1],3);//The disk head)
