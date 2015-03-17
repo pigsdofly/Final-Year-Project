@@ -5,6 +5,7 @@ class Utility {
 	}
 
 	static Boolean isNum(char c) {
+	//returns boolean value if character is a number
 		try { 
 			Integer.parseInt(Character.toString(c));
 		} catch(Exception e) {
@@ -14,7 +15,6 @@ class Utility {
 	}
 
 	static Boolean inBounds(int i) {
-		System.out.println(i);
 		if(i > 127 || i < 0) 
 			return false;
 		else
@@ -34,22 +34,91 @@ class Utility {
 	}
 
 	static ArrayList<Integer> sort(int cmode,ArrayList<Integer> inputs) {
-		if(cmode == 0 || inputs.size() == 1)
-		//if the current mode is FCFS or the queue is too small
-			return inputs;
-
-		if(cmode == 1) {
-			return sstf(inputs);
+		switch(cmode) {
+			case 0: return inputs;
+			case 1: return sstf(inputs);
+			case 2: return scan(inputs);
+			case 3: return cscan(inputs,false);
+			case 4: return cscan(inputs,true);
 		}
 
 		return inputs;
 	
 	}
+	
+	static ArrayList<Integer> scan(ArrayList<Integer>inputs) {
+	//sort for SCANs of all kinds
+		int i,k,temp;
+		int p = 0;
+		boolean d;//direction of movement
+		d = inputs.get(0) >= 64 ? true : false;
+		for(i=0;i<inputs.size()-1;i++) {
+			System.out.println(inputs.get(p));
+			k = scanLoop(i,d,inputs);
+			if(k != 0) {
+				inputs = swap(i+1,k,inputs);
+			} else if(p==0) {
+				d = !d;
+				if(inputs.get(i) >= 64) {
+					inputs.add(i+1,127);
+				} else if(inputs.get(i) <64) {
+					inputs.add(i+1,0);
+				}
+				p = i+1;
+				//adding a temporary min/max value
+			}
+		}
+		if(p != 0)
+			inputs.remove(p);
+		
+		return inputs;
+	}
+
+	static ArrayList<Integer> cscan(ArrayList<Integer> inputs,boolean look) {
+		int i,k,temp;
+		int p = 0;
+		boolean d;//direction of movement
+		d = inputs.get(0) >= 64 ? true : false;
+		for(i=0;i<inputs.size()-1;i++) {
+			k = scanLoop(i,d,inputs);
+			if(k!=0)
+				inputs = swap(i+1,k,inputs);
+			else if(p==0) {
+				if(inputs.get(i) >=64) {
+					inputs.add(i+1,0);
+				} if(inputs.get(i) <64)
+					inputs.add(i+1,127);
+				p=i+1;
+			}
+		}
+		if(look)
+			inputs.remove(p);
+		return inputs;
+	}
+	
+	static int scanLoop(int i,boolean d,ArrayList<Integer>inputs) {
+		int diff,k,j;
+		diff = 127;
+		k = 0;
+		for(j=i+1;j<inputs.size();j++) {
+			if(d && inputs.get(i) < inputs.get(j)) {
+				if(checkDiff(inputs.get(j),inputs.get(i),diff)) {
+					k = j;
+					diff = inputs.get(j) - inputs.get(i);
+				} 	
+			} else if(!d && inputs.get(i) > inputs.get(j)) {
+				if(checkDiff(inputs.get(i),inputs.get(j),diff)) {
+					k = j;
+					diff = inputs.get(i) - inputs.get(j);
+				}	
+			}
+		}
+		return k;
+	}
+
 
 	static ArrayList<Integer> sstf(ArrayList<Integer>inputs) {
 	//sort for SSTF
-	//there are probably more efficient sorts out there
-	
 		int i,j,k,temp,diff;
 
 		for(i=0;i<inputs.size() -1;i++) {
@@ -57,7 +126,7 @@ class Utility {
 			k=0;
 			for(j=i+1;j<inputs.size();j++) {
 			//inits j as next value in queue
-				if(Math.abs(inputs.get(j)-inputs.get(i)) < diff) {
+				if(checkDiff(inputs.get(j),inputs.get(i),diff)) {
 				//checks difference between values at j and i
 					k = j;
 					diff = Math.abs(inputs.get(j)-inputs.get(i));
@@ -66,13 +135,25 @@ class Utility {
 					
 			}
 			if(k!=0) {
-				temp = inputs.get(i+1);
-				inputs.set(i+1,inputs.get(k));
-				inputs.set(k,temp);
-				System.out.println("Swapped");
+				inputs = swap(i+1,k,inputs);
 			}
 		}
 		return inputs;
+	}
+
+	static ArrayList<Integer> swap(int i,int j, ArrayList<Integer>inputs) {
+		int temp = inputs.get(i);
+		inputs.set(i,inputs.get(j));
+		inputs.set(j,temp);
+		return inputs;
+	}
+
+	static boolean checkDiff(int i, int j, int diff) {
+		if(Math.abs(j - i) <= diff) {
+			return true;
+		}	
+
+		return false;
 	}
 	
 	static int checkPoints(boolean[] donePoints) {
@@ -95,6 +176,7 @@ class Utility {
 	}
 
 	static String queueToString(ArrayList<Integer> inputs,boolean[] donePoints,boolean pop) {
+	//converts array list to a string representation
 		int i;
 		String result = ""; 
 		for(i=0; i<inputs.size();i++) {

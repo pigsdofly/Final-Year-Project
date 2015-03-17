@@ -321,7 +321,6 @@ class GUI extends JPanel implements ActionListener {
 				}
 				iInputs.add(Integer.parseInt(sInputs[i]));
 			}
-			System.out.println(iInputs);
 		
 			textInput.setText("");
 			String temp = Utility.join(",",sInputs);
