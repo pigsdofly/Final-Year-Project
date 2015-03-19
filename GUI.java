@@ -17,6 +17,8 @@ class GUI extends JPanel implements ActionListener {
 	private JTextField textInput;
 	private JButton enter,submit,clear,random;
 
+	private Object[] options = {"Yes",
+								"No" };     //JOptionPane options
 	
 	private GridBagConstraints c;	        //constraints for sidebar, visual 
 										    //and inputs respectively
@@ -30,6 +32,7 @@ class GUI extends JPanel implements ActionListener {
 	private String output;
 	private String[] sInputs;
     private boolean submitting = false;
+	private boolean stopped = false;
     private Graphics2D g2;
 
 	private Timer timer;
@@ -99,14 +102,22 @@ class GUI extends JPanel implements ActionListener {
 		g2 = (Graphics2D) g;
 		initVis();
 		g2.setColor(Color.BLACK);
+		int pointX,pointY;
         
         if(submitting == true) {
+			int th = y2-20-(y1+55);
+			int hp = ((iInputs.size()-1)*30) > th ? th/iInputs.size():30;
+			System.out.println(hp);
             for(int i = 0;i<iInputs.size();i++) {
-                int pointX = (int)((unit*iInputs.get(i))+div+20);
+				g2.setColor(Color.BLACK);
+                pointX = (int)((unit*iInputs.get(i))+div+20);
 				//gets x coordinate of the point by multiplying the number by 
 				//unit size and adding that to the divider's x coordinate.
-				
-				int pointY = y1+20+((i+1)*30);
+				if(vis.cmode == 3 && (iInputs.get(i) == 0 
+					|| iInputs.get(i) == 127)) {
+					pointY = y1+40+(i*hp);
+				} else
+					pointY = y1+40+((i+1)*hp);
 				//orders points by the current value of i 
 				
 				points[i][0] = pointX;
@@ -115,12 +126,19 @@ class GUI extends JPanel implements ActionListener {
 				//converting the individual entries into an x coordinate
                 String iStr = iInputs.get(i) + "";
 
-                g2.drawString(iStr,pointX,y1+15);
+				int strY = iInputs.get(i)%2 == 0 ? y1+15 : y1+55; 
+                g2.drawString(iStr,pointX-5,strY);
                 g2.drawLine(pointX,y1+20,pointX,y1+40);
+				if(i+1== Utility.checkPoints(donePoints)) {
+					System.out.println(i+1);
+					g2.setColor(Color.RED);
+				}
 				g2.fillOval(pointX-5,pointY-5,10,10);
             }
+			g2.setColor(Color.BLACK);
 			
-			String mStr = "Total head movements: "+Utility.countMovements(iInputs);
+			String mStr = "Total head movements: "+
+						  Utility.countMovements(iInputs,vis.cmode);
 			g2.drawString(mStr,div+30,y2-20);
 			String inputString = "Requests: ";
 			inputString += Utility.queueToString(iInputs,donePoints,false);
@@ -130,23 +148,24 @@ class GUI extends JPanel implements ActionListener {
 
 			g2.drawString(inputString,div+30,y2-5);
 			g2.drawString(qString,div+30,y2+10);
-			
-			if(!vis.action)
-            	clearText();
-        }
 
-        g2.drawLine(div,y1,div,y2+30);//line to divide graph and HDD sections
-        g2.drawLine(div+20,y1+30,x+10,y1+30);//line for graph
-		g2.drawRect(x1,y1,(int)(x*0.9),y2); //main body of the HDD
-		g2.drawOval(x1,y1,w,y2); //The disk plate
-		g2.drawPolygon(dimensions[0],dimensions[1],3);//The disk head)
-
-		if(points.length > 0) {
-			for(int i=0;i<(points.length-1);i++) {
+			for(int i=0;i<(points.length-1);i++) { 
 				g2.drawLine(points[i][0],points[i][1],
 							points[i+1][0],points[i+1][1]);
 			}
-		}
+			
+        }
+
+        g2.drawLine(div+20,y1+30,x+10,y1+30);//line for graph
+		g2.drawRect(x1,y1,(int)(x*0.9),y2); //main body of the HDD
+
+		g2.setColor(new Color(0x333333));
+		g2.fillRect(x1,y1,div-x1,y2);
+		g2.setColor(new Color(0xcccccc));
+		g2.fillOval(x1,y1,w,y2); //The disk plate
+		g2.setColor(new Color(0xb2b2b2));
+		g2.fillPolygon(dimensions[0],dimensions[1],3);//The disk head)
+		g2.fillOval(dimensions[0][1]-5,dimensions[1][2]-10,98,40);//base of disk head
 	}
 
 	public void update(Graphics g) {
@@ -273,7 +292,21 @@ class GUI extends JPanel implements ActionListener {
 	//creates 5 random numbers to add to output
 		clearText();
 		Random r = new Random();		
-		int[] rands = {r.nextInt(128),r.nextInt(128),r.nextInt(128),r.nextInt(128),r.nextInt(128)}; 
+		int rl;
+		try {
+			rl = Integer.parseInt(JOptionPane.showInputDialog(null,"How many numbers? [1-10]"));
+			if(rl > 10 || rl < 0) {
+				JOptionPane.showMessageDialog(null,"Out of bounds!");
+				return;
+			}
+		} catch(Exception e) {
+			JOptionPane.showMessageDialog(null,"Input a number");
+			return;
+		}
+
+		int[] rands = new int[rl];
+		for(int i=0;i<rands.length;i++)
+			rands[i] = r.nextInt(125) + 1;
 		String rString = "";
 		for(int i=0;i<rands.length;i++) {
 			iInputs.add(rands[i]);
@@ -302,9 +335,7 @@ class GUI extends JPanel implements ActionListener {
 			String oldoutput = output;
 			for (i=0; i < txt.length(); i++) {
 				char cchar = txt.charAt(i);
-				if(cchar == ',' && i != 0) {
-					output += cchar;
-				} else if(Utility.isNum(cchar)) {
+				if((cchar == ',' && i != 0) || Utility.isNum(cchar)) {
 					output += cchar; //adds digits to a temp string for purposes of bound checking
 				} else {
 					JOptionPane.showMessageDialog(null,"Invalid input!");
@@ -355,6 +386,9 @@ class GUI extends JPanel implements ActionListener {
 			timer.setInitialDelay(0);
 			//will run immediately at first
 			timer.start();
+			
+
+
         } else {
             JOptionPane.showMessageDialog(null,"Input text first!");
         }

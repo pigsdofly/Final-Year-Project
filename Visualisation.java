@@ -67,7 +67,7 @@ class Visualisation {
 	public int[][] getPoly(double u) {
 		centerX = (int) (rectX * 0.4) +(int) u - 5;
         centerY = (rectY + (rectY/10))/2;
-		int[][] dimensions = {{centerX,(int)(rectX*0.7), (int)(rectX*0.8)},{centerY,rectY+20, rectY}};
+		int[][] dimensions = {{centerX,(int)(rectX*0.7)-10, (int)(rectX*0.8)-10},{centerY,rectY+20, rectY}};
         //dimensions for triangle representing disk head
 	
 		System.out.println("centerX: "+centerX);

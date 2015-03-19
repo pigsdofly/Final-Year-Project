@@ -162,14 +162,17 @@ class Utility {
 			if(!donePoints[i])
 				return i;
 		}
-		return donePoints.length -1;
+		return donePoints.length;
 	}
 
-	static int countMovements(ArrayList<Integer> inputs) {
+	static int countMovements(ArrayList<Integer> inputs,int mode) {
 	//counts the disk head movements
 		int movements = 0;
 		for(int i=0; i < inputs.size() -1;i++) {
-			movements += Math.abs(inputs.get(i) - inputs.get(i+1));
+			if(mode == 3 && (inputs.get(i+1) == 0 || inputs.get(i+1) == 127))
+				movements += 0;
+			else
+				movements += Math.abs(inputs.get(i) - inputs.get(i+1));
 		}
 		return movements;
 
