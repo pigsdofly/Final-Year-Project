@@ -1,5 +1,8 @@
 import java.lang.Exception;
 import java.util.ArrayList;
+
+/* Class of static utility methods that wouldn't fit in elsewhere */
+
 class Utility {
 	public Utility() {
 	}
@@ -168,14 +171,28 @@ class Utility {
 	static int countMovements(ArrayList<Integer> inputs,int mode) {
 	//counts the disk head movements
 		int movements = 0;
+		int snap = findSnap(inputs);
 		for(int i=0; i < inputs.size() -1;i++) {
-			if(mode == 3 && (inputs.get(i+1) == 0 || inputs.get(i+1) == 127))
+			if(mode >= 3 && i==snap )
 				movements += 0;
 			else
 				movements += Math.abs(inputs.get(i) - inputs.get(i+1));
 		}
 		return movements;
 
+	}
+
+	static int findSnap(ArrayList<Integer> inputs) {
+		int s,d;
+		s=d=0;
+		for(int i=0; i < inputs.size() - 1; i++) {
+			if(Math.abs(inputs.get(i)-inputs.get(i+1)) > d) {
+				System.out.println(d);
+				d = Math.abs(inputs.get(i)-inputs.get(i+1));
+				s = i;
+			}
+		}
+		return s+1;
 	}
 
 	static String queueToString(ArrayList<Integer> inputs,boolean[] donePoints,boolean pop) {

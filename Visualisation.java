@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
+/* Class to store details of visualisation */
+
 class Visualisation {
 	
 	public int cmode; //current mode. Not static because visualisation object should only be made once

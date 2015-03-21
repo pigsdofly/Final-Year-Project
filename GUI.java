@@ -6,7 +6,7 @@ import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-/* Class for all GUI setup */
+/* Class for all GUI setup and output */
 
 @SuppressWarnings("serial")
 class GUI extends JPanel implements ActionListener {
@@ -107,14 +107,17 @@ class GUI extends JPanel implements ActionListener {
         if(submitting == true) {
 			int th = y2-20-(y1+55);
 			int hp = ((iInputs.size()-1)*30) > th ? th/iInputs.size():30;
-			System.out.println(hp);
+			//sets 'gap' between points on graph
+
+			int snap = vis.cmode>=3 ? Utility.findSnap(iInputs): 0;
+			//saving the point the head 'snaps' to the opposite side
+			
             for(int i = 0;i<iInputs.size();i++) {
 				g2.setColor(Color.BLACK);
                 pointX = (int)((unit*iInputs.get(i))+div+20);
 				//gets x coordinate of the point by multiplying the number by 
 				//unit size and adding that to the divider's x coordinate.
-				if(vis.cmode == 3 && (iInputs.get(i) == 0 
-					|| iInputs.get(i) == 127)) {
+				if(i==snap) {
 					pointY = y1+40+(i*hp);
 				} else
 					pointY = y1+40+((i+1)*hp);
@@ -127,12 +130,17 @@ class GUI extends JPanel implements ActionListener {
                 String iStr = iInputs.get(i) + "";
 
 				int strY = iInputs.get(i)%2 == 0 ? y1+15 : y1+55; 
+				//if a value is even, place it above the graph, otherwise
+				//place it below
+
                 g2.drawString(iStr,pointX-5,strY);
                 g2.drawLine(pointX,y1+20,pointX,y1+40);
+
 				if(i+1== Utility.checkPoints(donePoints)) {
 					System.out.println(i+1);
 					g2.setColor(Color.RED);
 				}
+
 				g2.fillOval(pointX-5,pointY-5,10,10);
             }
 			g2.setColor(Color.BLACK);
@@ -150,17 +158,45 @@ class GUI extends JPanel implements ActionListener {
 			g2.drawString(qString,div+30,y2+10);
 
 			for(int i=0;i<(points.length-1);i++) { 
-				g2.drawLine(points[i][0],points[i][1],
-							points[i+1][0],points[i+1][1]);
+				if(snap != 0 && i+1 == snap) {
+					//if the algorithm is C-SCAN or C-LOOK, set the line where
+					//the disk head swaps to the other side of the platter to 
+					//be dotted
+					if(points[i][0] < points[i+1][0]) {
+						for(int j = points[i][0];j < points[i+1][0];j+=20) {
+							if(j+10>points[i+1][0]) {
+								g2.drawLine(j,points[i][1],
+											points[i+1][0],points[i][1]);
+							} else {
+								g2.drawLine(j,points[i][1],
+											j+10,points[i][1]);
+							}
+						}
+					} else {
+						for(int j = points[i][0];j > points[i+1][0];j-=20) {
+							if(j-10<points[i+1][0]) {
+								g2.drawLine(j,points[i][1],
+											points[i+1][0],points[i][1]);
+							} else {
+								g2.drawLine(j,points[i][1],
+											j-10,points[i][1]);
+							}
+						}
+					}
+				}  else {
+					//otherwise just draw a line
+					g2.drawLine(points[i][0],points[i][1],
+								points[i+1][0],points[i+1][1]);
+				}
 			}
 			
         }
 
         g2.drawLine(div+20,y1+30,x+10,y1+30);//line for graph
-		g2.drawRect(x1,y1,(int)(x*0.9),y2); //main body of the HDD
+		g2.drawRect(x1,y1,(int)(x*0.9),y2); //main body of the visualisation
 
 		g2.setColor(new Color(0x333333));
-		g2.fillRect(x1,y1,div-x1,y2);
+		g2.fillRect(x1,y1,div-x1,y2);//the background of the HDD
 		g2.setColor(new Color(0xcccccc));
 		g2.fillOval(x1,y1,w,y2); //The disk plate
 		g2.setColor(new Color(0xb2b2b2));
@@ -294,7 +330,7 @@ class GUI extends JPanel implements ActionListener {
 		Random r = new Random();		
 		int rl;
 		try {
-			rl = Integer.parseInt(JOptionPane.showInputDialog(null,"How many numbers? [1-10]"));
+			rl = Integer.parseInt(JOptionPane.showInputDialog(null,"How many numbers? [1-10]","5"));
 			if(rl > 10 || rl < 0) {
 				JOptionPane.showMessageDialog(null,"Out of bounds!");
 				return;
@@ -336,7 +372,8 @@ class GUI extends JPanel implements ActionListener {
 			for (i=0; i < txt.length(); i++) {
 				char cchar = txt.charAt(i);
 				if((cchar == ',' && i != 0) || Utility.isNum(cchar)) {
-					output += cchar; //adds digits to a temp string for purposes of bound checking
+					output += cchar; 
+					//adds digits to a temp string for purposes of bound checking
 				} else {
 					JOptionPane.showMessageDialog(null,"Invalid input!");
 					return;
@@ -346,7 +383,8 @@ class GUI extends JPanel implements ActionListener {
             iInputs.clear();
 			for (i=0; i < sInputs.length; i++) {
 				if(!Utility.inBounds(Integer.parseInt(sInputs[i]))) {
-					JOptionPane.showMessageDialog(null,"Input "+sInputs[i]+" is not within bounds!");
+					JOptionPane.showMessageDialog(null,"Input "+sInputs[i]+
+												  " is not within bounds!");
 					output = oldoutput;
 					return;
 				}
@@ -397,6 +435,7 @@ class GUI extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 	//actionlistener, switch based on jbutton text
 		try {
+		//if the action is from pressing on a button, go through this switch
 			switch(e.getActionCommand()) {
 				case "Enter":  textEntered();
 							   break;
@@ -419,7 +458,7 @@ class GUI extends JPanel implements ActionListener {
 							  break;
 			}
 		} catch(Exception ex) {
-		//this is horrible, but it works
+		//otherwise, its from the timer
 			animations();
 		}
 	}
