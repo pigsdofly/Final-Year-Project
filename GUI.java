@@ -23,6 +23,7 @@ class GUI extends JPanel implements ActionListener {
 	private GridBagConstraints c;	        //constraints for sidebar, visual 
 										    //and inputs respectively
 	private int w, x,x1,y1,y2,isize,div;
+	private int pointX,pointY;
 	private int xoff; 					    // x offset for visualisation
 	private int sleepTime = 0;
 	private double w2,unit;
@@ -31,14 +32,14 @@ class GUI extends JPanel implements ActionListener {
 	private boolean[] donePoints;
 	private String output;
 	private String[] sInputs;
-    private boolean submitting = false;
+	private boolean submitting = false;
 	private boolean stopped = false;
-    private Graphics2D g2;
+	private Graphics2D g2;
 
 	private Timer timer;
-
-	public ArrayList<Integer> iInputs = new ArrayList<Integer>();
     
+	public ArrayList<Integer> iInputs = new ArrayList<Integer>();
+	
 	private Visualisation vis;
 	
 	public GUI(int w, int h) {
@@ -50,8 +51,26 @@ class GUI extends JPanel implements ActionListener {
 		vis	= new Visualisation(visual.getSize());
 	}
 
+	private void animations() { 
+	//main loop function for the animations
+		int i = Utility.checkPoints(donePoints);
+		//i is the 'current' point being snapped to
+		vis.action = true;
+		//boolean variable showing that an action is taking place
+
+		dimensions = vis.getPoly(iInputs.get(i)*w2);
+		donePoints[i] = true;
+		repaint();
+
+		/*if(donePoints[donePoints.length-1] && vis.cmode > 3) {
+			iInputs.remove(iInputs.indexOf(0));
+			iInputs.remove(iInputs.indexOf(127));
+		}*/
+	}
+	
+
 	private void initVis() {
-		//initializes all variables used in drawing
+	//initializes all variables used in drawing
 		vis.updateSize(visual.getSize());
 		xoff = sidebar.getSize().width;
 		x = vis.getRectX() + xoff;
@@ -88,13 +107,14 @@ class GUI extends JPanel implements ActionListener {
 
 	}
 	private void initDonePoints() {	
+	//initializes the done points array
 		donePoints = new boolean[isize];
 		for(int i=0;i<isize;i++) {
 			donePoints[i] = false;
 		}
 		dpinit = true;
 	}
-	
+
 	@Override
 	public void paint(Graphics g) {
 	//overriden JComponent paint function
@@ -102,7 +122,6 @@ class GUI extends JPanel implements ActionListener {
 		g2 = (Graphics2D) g;
 		initVis();
 		g2.setColor(Color.BLACK);
-		int pointX,pointY;
         
         if(submitting == true) {
 			int th = y2-20-(y1+55);
@@ -111,6 +130,7 @@ class GUI extends JPanel implements ActionListener {
 
 			int snap = vis.cmode>=3 ? Utility.findSnap(iInputs): 0;
 			//saving the point the head 'snaps' to the opposite side
+			boolean lS = false;
 			
             for(int i = 0;i<iInputs.size();i++) {
 				g2.setColor(Color.BLACK);
@@ -129,14 +149,14 @@ class GUI extends JPanel implements ActionListener {
 				//converting the individual entries into an x coordinate
                 String iStr = iInputs.get(i) + "";
 
-				int strY = iInputs.get(i)%2 == 0 ? y1+15 : y1+55; 
+				int strY = lS ? y1+15 : y1+55; 
 				//if a value is even, place it above the graph, otherwise
 				//place it below
 
                 g2.drawString(iStr,pointX-5,strY);
                 g2.drawLine(pointX,y1+20,pointX,y1+40);
 
-				if(i+1== Utility.checkPoints(donePoints)) {
+				if(i+1 == Utility.checkPoints(donePoints)) {
 					System.out.println(i+1);
 					g2.setColor(Color.RED);
 				}
@@ -204,20 +224,6 @@ class GUI extends JPanel implements ActionListener {
 		g2.fillOval(dimensions[0][1]-5,dimensions[1][2]-10,98,40);//base of disk head
 	}
 
-	public void update(Graphics g) {
-		paint(g);
-	}
-
-	private void animations() { 
-		int i = Utility.checkPoints(donePoints);//i is the next point to be snapped to
-	
-		vis.action = true;
-
-		dimensions = vis.getPoly(iInputs.get(i)*w2);
-		donePoints[i] = true;
-		System.out.println(i);
-		repaint();
-	}
 
 	private void setupLayout() {
 	//sets up layout for program
@@ -232,28 +238,26 @@ class GUI extends JPanel implements ActionListener {
 	private void sidebarSetup() {
 	//setup for the sidebar
 		sidebar = new JPanel();
-		JButton FCFS = new JButton("FCFS");
-		JButton SSTF = new JButton("SSTF");
-		JButton SCAN = new JButton("SCAN");
-		JButton CSCAN = new JButton("C-SCAN");
-		JButton CLOOK = new JButton("C-LOOK");
-
-		FCFS.addActionListener(this);
-		SSTF.addActionListener(this);
-		SCAN.addActionListener(this);
-		CSCAN.addActionListener(this);
-		CLOOK.addActionListener(this);
-
 		sidebar.setLayout(new GridLayout(5,1));
-		sidebar.add(FCFS);
-		sidebar.add(SSTF);
-		sidebar.add(SCAN);
-		sidebar.add(CSCAN);
-		sidebar.add(CLOOK);
-	
+		String[] Labels = {"FCFS","SSTF","SCAN",
+							"C-SCAN","C-LOOK"};
+		String[] Tooltips = {"Serves requests in order they were input",
+							 "Sorts requests by shortest seek time between them",
+							 "Serves all requests closest to the disk head in" +
+							 "one direction, then moves in the opposite " + 
+							 "direction",
+							 "Like SCAN, but snaps to the opposite end when it" + 							  " reaches an edge",
+							 "Like C-SCAN, but snaps to the request " + 
+							 "closest to that edge" };
+		JButton[] buttons = new JButton[5];
+		for(int i=0;i<5;i++) {
+			buttons[i] = new JButton(Labels[i]);
+			buttons[i].setToolTipText(Tooltips[i]);
+			buttons[i].addActionListener(this);
+			sidebar.add(buttons[i]);
+		}	
+
 		this.add(sidebar,BorderLayout.WEST);
-		
-	
 	}
 
 	private void centerSetup() {
@@ -286,10 +290,12 @@ class GUI extends JPanel implements ActionListener {
 
 		enterP.setLayout(new GridLayout(1,2));
 		enter = new JButton("Enter");
+		enter.setToolTipText("Enter the numbers");
 		enter.addActionListener(this);
 		enterP.add(enter);
 
 		random = new JButton("Random");
+		random.setToolTipText("Add a specified number of random ints");
 		random.addActionListener(this);
 		enterP.add(random);
 
@@ -303,12 +309,14 @@ class GUI extends JPanel implements ActionListener {
 		inputfield.add(cInput,c);
 		
 		submit = new JButton("Submit");
+		submit.setToolTipText("Submit the entered numbers and start animation");
 		submit.addActionListener(this);
 		c.gridx = 1;
 		c.gridy = 2;
 		inputfield.add(submit,c);
 
 		clear = new JButton("Clear");
+		clear.setToolTipText("Clear all inputs and stop animation");
 		clear.addActionListener(this);
 		c.gridx = 1;
 		c.gridy = 3;
@@ -380,7 +388,6 @@ class GUI extends JPanel implements ActionListener {
 				}
 			}
 			sInputs = output.split(",");
-            iInputs.clear();
 			for (i=0; i < sInputs.length; i++) {
 				if(!Utility.inBounds(Integer.parseInt(sInputs[i]))) {
 					JOptionPane.showMessageDialog(null,"Input "+sInputs[i]+
@@ -388,7 +395,6 @@ class GUI extends JPanel implements ActionListener {
 					output = oldoutput;
 					return;
 				}
-				iInputs.add(Integer.parseInt(sInputs[i]));
 			}
 		
 			textInput.setText("");
@@ -399,6 +405,7 @@ class GUI extends JPanel implements ActionListener {
 			return;
 		}
 	}
+
 
 	private void clearText() {
 	//clears all inputs
@@ -411,10 +418,13 @@ class GUI extends JPanel implements ActionListener {
     
     private void submitInputs() {
 	//sets all the flags for animating, then begins animation timer
-        if(cInput.getText().length() != 0) {
+		
+		if(cInput.getText().length() != 0) {
 			dpinit = false;
-			iInputs = Utility.sort(vis.cmode,iInputs);
-            vis.setInputs(iInputs);
+			iInputs = Utility.sort(vis.cmode,
+								   Utility.textToArrayList(cInput.getText()));
+          	//reassigning iInputs each time to fix a bug with C-SCAN
+			vis.setInputs(iInputs);
 			vis.action = true;
             submitting = true;
 			repaint();
@@ -425,8 +435,6 @@ class GUI extends JPanel implements ActionListener {
 			//will run immediately at first
 			timer.start();
 			
-
-
         } else {
             JOptionPane.showMessageDialog(null,"Input text first!");
         }

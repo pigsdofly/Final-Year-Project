@@ -183,6 +183,7 @@ class Utility {
 	}
 
 	static int findSnap(ArrayList<Integer> inputs) {
+	//function to find where the disk head snaps to the other side of the platter 
 		int s,d;
 		s=d=0;
 		for(int i=0; i < inputs.size() - 1; i++) {
@@ -209,5 +210,14 @@ class Utility {
 		}
 	
 		return result;
+	}
+
+	static ArrayList<Integer> textToArrayList(String textInput) {
+		ArrayList<Integer> inputs = new ArrayList<Integer>();
+		String[] sInputs = textInput.split(",");
+		for(int i=0;i<sInputs.length;i++) {
+			inputs.add(Integer.parseInt(sInputs[i]));
+		}
+		return inputs;	
 	}
 }
