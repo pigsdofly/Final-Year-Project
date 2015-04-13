@@ -7,7 +7,7 @@ class Utility {
 	public Utility() {
 	}
 
-	static Boolean isNum(char c) {
+	public static Boolean isNum(char c) {
 	//returns boolean value if character is a number
 		try { 
 			Integer.parseInt(Character.toString(c));
@@ -17,14 +17,14 @@ class Utility {
 		return true;
 	}
 
-	static Boolean inBounds(int i) {
+	public static Boolean inBounds(int i) {
 		if(i > 127 || i < 0) 
 			return false;
 		else
 			return true;
 	}
 
-	static String join(String glue,String[] arr) {
+	public static String join(String glue,String[] arr) {
 		int i;
 		String result = "";
 		for(i=0; i < arr.length; i++) {
@@ -36,7 +36,7 @@ class Utility {
 		return result;
 	}
 
-	static ArrayList<Integer> sort(int cmode,ArrayList<Integer> inputs) {
+	public static ArrayList<Integer> sort(int cmode,ArrayList<Integer> inputs) {
 		switch(cmode) {
 			case 0: return inputs;
 			case 1: return sstf(inputs);
@@ -49,7 +49,7 @@ class Utility {
 	
 	}
 	
-	static ArrayList<Integer> scan(ArrayList<Integer>inputs) {
+	public static ArrayList<Integer> scan(ArrayList<Integer>inputs) {
 	//sort for SCANs of all kinds
 		int i,k,temp;
 		int p = 0;
@@ -77,7 +77,7 @@ class Utility {
 		return inputs;
 	}
 
-	static ArrayList<Integer> cscan(ArrayList<Integer> inputs,boolean look) {
+	public static ArrayList<Integer> cscan(ArrayList<Integer> inputs,boolean look) {
 		int i,k,temp;
 		int p = 0;
 		boolean d;//direction of movement
@@ -99,7 +99,7 @@ class Utility {
 		return inputs;
 	}
 	
-	static int scanLoop(int i,boolean d,ArrayList<Integer>inputs) {
+	public static int scanLoop(int i,boolean d,ArrayList<Integer>inputs) {
 		int diff,k,j;
 		diff = 127;
 		k = 0;
@@ -120,7 +120,7 @@ class Utility {
 	}
 
 
-	static ArrayList<Integer> sstf(ArrayList<Integer>inputs) {
+	public static ArrayList<Integer> sstf(ArrayList<Integer>inputs) {
 	//sort for SSTF
 		int i,j,k,temp,diff;
 
@@ -144,14 +144,14 @@ class Utility {
 		return inputs;
 	}
 
-	static ArrayList<Integer> swap(int i,int j, ArrayList<Integer>inputs) {
+	public static ArrayList<Integer> swap(int i,int j, ArrayList<Integer>inputs) {
 		int temp = inputs.get(i);
 		inputs.set(i,inputs.get(j));
 		inputs.set(j,temp);
 		return inputs;
 	}
 
-	static boolean checkDiff(int i, int j, int diff) {
+	public static boolean checkDiff(int i, int j, int diff) {
 		if(Math.abs(j - i) <= diff) {
 			return true;
 		}	
@@ -159,7 +159,7 @@ class Utility {
 		return false;
 	}
 	
-	static int checkPoints(boolean[] donePoints) {
+	public static int checkPoints(boolean[] donePoints) {
 	//loops through donepoints and returns the first value that isn't true
 		for(int i=0;i<donePoints.length;i++) {
 			if(!donePoints[i])
@@ -168,7 +168,7 @@ class Utility {
 		return donePoints.length;
 	}
 
-	static int countMovements(ArrayList<Integer> inputs,int mode) {
+	public static int countMovements(ArrayList<Integer> inputs,int mode) {
 	//counts the disk head movements
 		int movements = 0;
 		int snap = findSnap(inputs);
@@ -182,7 +182,7 @@ class Utility {
 
 	}
 
-	static int findSnap(ArrayList<Integer> inputs) {
+	public static int findSnap(ArrayList<Integer> inputs) {
 	//function to find where the disk head snaps to the other side of the platter 
 		int s,d;
 		s=d=0;
@@ -196,7 +196,7 @@ class Utility {
 		return s+1;
 	}
 
-	static String queueToString(ArrayList<Integer> inputs,boolean[] donePoints,boolean pop) {
+	public static String queueToString(ArrayList<Integer> inputs,boolean[] donePoints,boolean pop) {
 	//converts array list to a string representation
 		int i;
 		String result = ""; 
@@ -212,7 +212,7 @@ class Utility {
 		return result;
 	}
 
-	static ArrayList<Integer> textToArrayList(String textInput) {
+	public static ArrayList<Integer> textToArrayList(String textInput) {
 		ArrayList<Integer> inputs = new ArrayList<Integer>();
 		String[] sInputs = textInput.split(",");
 		for(int i=0;i<sInputs.length;i++) {

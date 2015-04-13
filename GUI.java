@@ -38,14 +38,14 @@ class GUI extends JPanel implements ActionListener {
 
 	private Timer timer;
     
-	public ArrayList<Integer> iInputs = new ArrayList<Integer>();
+	private ArrayList<Integer> iInputs = new ArrayList<Integer>();
 	
 	private Visualisation vis;
 	
-	public GUI(int w, int h) {
+	public GUI(int width, int height) {
 	//default constructor for the GUI
 		super();
-		this.setSize(w,h);
+		this.setSize(width,height);
 		setupLayout();
 
 		vis	= new Visualisation(visual.getSize());
