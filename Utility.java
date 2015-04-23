@@ -144,7 +144,7 @@ class Utility {
 		return inputs;
 	}
 
-	public static ArrayList<Integer> swap(int i,int j, ArrayList<Integer>inputs) {
+	private static ArrayList<Integer> swap(int i,int j, ArrayList<Integer>inputs) {
 		int temp = inputs.get(i);
 		inputs.set(i,inputs.get(j));
 		inputs.set(j,temp);
@@ -173,7 +173,7 @@ class Utility {
 		int movements = 0;
 		int snap = findSnap(inputs);
 		for(int i=0; i < inputs.size() -1;i++) {
-			if(mode >= 3 && i==snap )
+			if(mode >= 3 && i==snap-1 )
 				movements += 0;
 			else
 				movements += Math.abs(inputs.get(i) - inputs.get(i+1));

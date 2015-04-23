@@ -15,18 +15,17 @@ class GUI extends JPanel implements ActionListener {
 											//and input space
 	private JLabel cInput;
 	private JTextField textInput;
-	private JButton enter,submit,clear,random;
 
 	private Object[] options = {"Yes",
 								"No" };     //JOptionPane options
 	
 	private GridBagConstraints c;	        //constraints for sidebar, visual 
 										    //and inputs respectively
-	private int w, x,x1,y1,y2,isize,div;
+	private int x1,x2,isize,div;
 	private int pointX,pointY;
 	private int xoff; 					    // x offset for visualisation
 	private int sleepTime = 0;
-	private double w2,unit;
+	private double diskUnit,graphUnit;
 	private boolean dpinit = false;
 	private int[][] dimensions,points;
 	private boolean[] donePoints;
@@ -58,34 +57,27 @@ class GUI extends JPanel implements ActionListener {
 		vis.action = true;
 		//boolean variable showing that an action is taking place
 
-		dimensions = vis.getPoly(iInputs.get(i)*w2);
+		dimensions = vis.getPoly(iInputs.get(i)*diskUnit);
 		donePoints[i] = true;
 		repaint();
 
-		/*if(donePoints[donePoints.length-1] && vis.cmode > 3) {
-			iInputs.remove(iInputs.indexOf(0));
-			iInputs.remove(iInputs.indexOf(127));
-		}*/
 	}
 	
 
 	private void initVis() {
-	//initializes all variables used in drawing
+	//initializes all class variables used in drawing
 		vis.updateSize(visual.getSize());
 		xoff = sidebar.getSize().width;
-		x = vis.getRectX() + xoff;
-        x1 = x/7;
-        y2 = vis.getRectY();
-        y1 = y2/10;//variables named after order of use
-        w = vis.getCircWidth();
+		x1 = vis.getRectX() + xoff;
+        x2 = x1/7;
 
 		isize = iInputs.size();
 
-		w2 = (x1 / 127.0); //disk divided into units
-		unit = ((x+10) - (div+20)) / 127.0; 
+		diskUnit = (x2 / 127.0); //disk divided into units
+		graphUnit = ((x1+10) - (div+20)) / 127.0; 
 		//amount of distance between units on the graph
 		
-        double divider = x*0.75;
+        double divider = x1*0.75;
         div = (int) divider;
 		
 			
@@ -96,7 +88,7 @@ class GUI extends JPanel implements ActionListener {
 		if(!vis.action)
 			dimensions = vis.getPoly(0);
 		else if(vis.action && !donePoints[0]) {
-			dimensions = vis.getPoly(iInputs.get(0) *w2);
+			dimensions = vis.getPoly(iInputs.get(0) *diskUnit);
 		}
 		try{	
 			if(donePoints[donePoints.length-1]) {
@@ -121,6 +113,11 @@ class GUI extends JPanel implements ActionListener {
 		super.paint(g);
 		g2 = (Graphics2D) g;
 		initVis();
+
+        int y2 = vis.getRectY();
+        int y1 = y2/10;//variables named after order of use
+        int w = vis.getCircWidth();
+
 		g2.setColor(Color.BLACK);
         
         if(submitting == true) {
@@ -130,11 +127,11 @@ class GUI extends JPanel implements ActionListener {
 
 			int snap = vis.cmode>=3 ? Utility.findSnap(iInputs): 0;
 			//saving the point the head 'snaps' to the opposite side
-			boolean lS = false;
+			boolean lS = true;
 			
             for(int i = 0;i<iInputs.size();i++) {
 				g2.setColor(Color.BLACK);
-                pointX = (int)((unit*iInputs.get(i))+div+20);
+                pointX = (int)((graphUnit*iInputs.get(i))+div+20);
 				//gets x coordinate of the point by multiplying the number by 
 				//unit size and adding that to the divider's x coordinate.
 				if(i==snap) {
@@ -212,13 +209,13 @@ class GUI extends JPanel implements ActionListener {
 			
         }
 
-        g2.drawLine(div+20,y1+30,x+10,y1+30);//line for graph
-		g2.drawRect(x1,y1,(int)(x*0.9),y2); //main body of the visualisation
+        g2.drawLine(div+20,y1+30,x1+10,y1+30);//line for graph
+		g2.drawRect(x2,y1,(int)(x1*0.9),y2); //main body of the visualisation
 
 		g2.setColor(new Color(0x333333));
-		g2.fillRect(x1,y1,div-x1,y2);//the background of the HDD
+		g2.fillRect(x2,y1,div-x2,y2);//the background of the HDD
 		g2.setColor(new Color(0xcccccc));
-		g2.fillOval(x1,y1,w,y2); //The disk plate
+		g2.fillOval(x2,y1,w,y2); //The disk plate
 		g2.setColor(new Color(0xb2b2b2));
 		g2.fillPolygon(dimensions[0],dimensions[1],3);//The disk head)
 		g2.fillOval(dimensions[0][1]-5,dimensions[1][2]-10,98,40);//base of disk head
@@ -246,7 +243,7 @@ class GUI extends JPanel implements ActionListener {
 							 "Serves all requests closest to the disk head in" +
 							 "one direction, then moves in the opposite " + 
 							 "direction",
-							 "Like SCAN, but snaps to the opposite end when it" + 							  " reaches an edge",
+							 "Like SCAN, but snaps to the opposite end when it" + " reaches an edge",
 							 "Like C-SCAN, but snaps to the request " + 
 							 "closest to that edge" };
 		JButton[] buttons = new JButton[5];
@@ -289,12 +286,12 @@ class GUI extends JPanel implements ActionListener {
 		JPanel enterP = new JPanel();
 
 		enterP.setLayout(new GridLayout(1,2));
-		enter = new JButton("Enter");
+		JButton enter = new JButton("Enter");
 		enter.setToolTipText("Enter the numbers");
 		enter.addActionListener(this);
 		enterP.add(enter);
 
-		random = new JButton("Random");
+		JButton random = new JButton("Random");
 		random.setToolTipText("Add a specified number of random ints");
 		random.addActionListener(this);
 		enterP.add(random);
@@ -308,14 +305,14 @@ class GUI extends JPanel implements ActionListener {
 		c.gridy = 1;
 		inputfield.add(cInput,c);
 		
-		submit = new JButton("Submit");
+		JButton submit = new JButton("Submit");
 		submit.setToolTipText("Submit the entered numbers and start animation");
 		submit.addActionListener(this);
 		c.gridx = 1;
 		c.gridy = 2;
 		inputfield.add(submit,c);
 
-		clear = new JButton("Clear");
+		JButton clear = new JButton("Clear");
 		clear.setToolTipText("Clear all inputs and stop animation");
 		clear.addActionListener(this);
 		c.gridx = 1;
