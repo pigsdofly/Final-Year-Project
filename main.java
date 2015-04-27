@@ -9,7 +9,7 @@ public class main {
 	public static void main(String[] args) {
 		try {
 			UIManager.setLookAndFeel(
-				UIManager.getCrossPlatformLookAndFeelClassName());//changes look and feel to  
+				UIManager.getCrossPlatformLookAndFeelClassName());//tries to change look and feel to  
 																  //system default
 		} catch (Exception e) {
 			System.exit(0);
