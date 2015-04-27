@@ -1,3 +1,4 @@
+/* Written by Samuel Pearce, ID: B223185*/
 import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.*;
@@ -24,15 +25,16 @@ class GUI extends JPanel implements ActionListener {
 	private int x1,x2,isize,div;
 	private int pointX,pointY;
 	private int xoff; 					    // x offset for visualisation
-	private int sleepTime = 0;
+	//private int sleepTime = 0;              
 	private double diskUnit,graphUnit;
-	private boolean dpinit = false;
 	private int[][] dimensions,points;
-	private boolean[] donePoints;
+	private boolean[] donePoints;           //array that keeps track of which 
+                                            //points on the graph have been visited
 	private String output;
 	private String[] sInputs;
-	private boolean submitting = false;
-	private boolean stopped = false;
+    private boolean dpinit = false;         // flag to check if donePoints is initialised
+	private boolean submitting = false;     // flag to check if the visualisation is active
+	//private boolean stopped = false;
 	private Graphics2D g2;
 
 	private Timer timer;
@@ -47,7 +49,7 @@ class GUI extends JPanel implements ActionListener {
 		this.setSize(width,height);
 		setupLayout();
 
-		vis	= new Visualisation(visual.getSize());
+		vis	= new Visualisation(visual.getSize()); 
 	}
 
 	private void animations() { 
@@ -58,6 +60,7 @@ class GUI extends JPanel implements ActionListener {
 		//boolean variable showing that an action is taking place
 
 		dimensions = vis.getPoly(iInputs.get(i)*diskUnit);
+        //changes disk head position ('tip' of triangle) to current point
 		donePoints[i] = true;
 		repaint();
 
@@ -99,7 +102,7 @@ class GUI extends JPanel implements ActionListener {
 
 	}
 	private void initDonePoints() {	
-	//initializes the done points array
+	//initializes the done points array as an array the same size as iInputs
 		donePoints = new boolean[isize];
 		for(int i=0;i<isize;i++) {
 			donePoints[i] = false;
@@ -109,7 +112,7 @@ class GUI extends JPanel implements ActionListener {
 
 	@Override
 	public void paint(Graphics g) {
-	//overriden JComponent paint function
+	//overriden JComponent paint function, this is where all the actual drawing goes
 		super.paint(g);
 		g2 = (Graphics2D) g;
 		initVis();
@@ -127,7 +130,6 @@ class GUI extends JPanel implements ActionListener {
 
 			int snap = vis.cmode>=3 ? Utility.findSnap(iInputs): 0;
 			//saving the point the head 'snaps' to the opposite side
-			boolean lS = true;
 			
             for(int i = 0;i<iInputs.size();i++) {
 				g2.setColor(Color.BLACK);
@@ -146,10 +148,8 @@ class GUI extends JPanel implements ActionListener {
 				//converting the individual entries into an x coordinate
                 String iStr = iInputs.get(i) + "";
 
-				int strY = lS ? y1+15 : y1+55; 
-				//if a value is even, place it above the graph, otherwise
-				//place it below
-
+				int strY = y1+15; 
+				//draw label for point on graph, and line between current point and next one
                 g2.drawString(iStr,pointX-5,strY);
                 g2.drawLine(pointX,y1+20,pointX,y1+40);
 
@@ -161,10 +161,14 @@ class GUI extends JPanel implements ActionListener {
 				g2.fillOval(pointX-5,pointY-5,10,10);
             }
 			g2.setColor(Color.BLACK);
+
 			
+			//code for set of strings at lower end of graph listing head movements,
+			//a static queue of requests, and a moving queue of requests
 			String mStr = "Total head movements: "+
 						  Utility.countMovements(iInputs,vis.cmode);
 			g2.drawString(mStr,div+30,y2-20);
+
 			String inputString = "Requests: ";
 			inputString += Utility.queueToString(iInputs,donePoints,false);
 
@@ -176,20 +180,27 @@ class GUI extends JPanel implements ActionListener {
 
 			for(int i=0;i<(points.length-1);i++) { 
 				if(snap != 0 && i+1 == snap) {
-					//if the algorithm is C-SCAN or C-LOOK, set the line where
-					//the disk head swaps to the other side of the platter to 
-					//be dotted
+					//if the algorithm is C-SCAN or C-LOOK, draws a dotted line where the disk
+					//head jumps to the other side of the platter
+					//there are two variations for each direction the line could be drawn
 					if(points[i][0] < points[i+1][0]) {
+					//line going from left-to-right
 						for(int j = points[i][0];j < points[i+1][0];j+=20) {
+						//loops and draws a group of smaller lines
 							if(j+10>points[i+1][0]) {
+							//if the line endpoint is past the x value of the next point
+							//set the endpoint to that value
 								g2.drawLine(j,points[i][1],
 											points[i+1][0],points[i][1]);
 							} else {
+							//otherwise draw a line 10 pixels wide
 								g2.drawLine(j,points[i][1],
 											j+10,points[i][1]);
 							}
 						}
 					} else {
+					//line going from right-to-left
+					//same as left-to-right, but conditionals are different
 						for(int j = points[i][0];j > points[i+1][0];j-=20) {
 							if(j-10<points[i+1][0]) {
 								g2.drawLine(j,points[i][1],
@@ -248,6 +259,7 @@ class GUI extends JPanel implements ActionListener {
 							 "closest to that edge" };
 		JButton[] buttons = new JButton[5];
 		for(int i=0;i<5;i++) {
+		//loops through arrays of labels and tooltips and creates buttons from them
 			buttons[i] = new JButton(Labels[i]);
 			buttons[i].setToolTipText(Tooltips[i]);
 			buttons[i].addActionListener(this);
@@ -265,12 +277,14 @@ class GUI extends JPanel implements ActionListener {
 		inputfield.setLayout(new GridBagLayout());
 		c = new GridBagConstraints();
 		//layout for the user inputs and buttons
-		c.gridx = 0;
-		c.gridy = 0;
-		c.fill = GridBagConstraints.NONE;
+		//default padding and weights for gridbag layout
 		c.weightx = 0.5;
 		c.weighty = 0.5;
 		c.ipadx = 1;
+
+		c.gridx = 0;
+		c.gridy = 0;
+		c.fill = GridBagConstraints.NONE;
 		inputfield.add(new JLabel("Inputs"),c);
 		
 		c.gridx = 0;
@@ -330,11 +344,12 @@ class GUI extends JPanel implements ActionListener {
 		this.add(center,BorderLayout.CENTER);
 	}
 	private void addRandom() {
-	//creates 5 random numbers to add to output
+	//creates a user-specified amount of random numbers to add to output
 		clearText();
 		Random r = new Random();		
 		int rl;
 		try {
+		//simple bounds test
 			rl = Integer.parseInt(JOptionPane.showInputDialog(null,"How many numbers? [1-10]","5"));
 			if(rl > 10 || rl < 0) {
 				JOptionPane.showMessageDialog(null,"Out of bounds!");
@@ -344,10 +359,11 @@ class GUI extends JPanel implements ActionListener {
 			JOptionPane.showMessageDialog(null,"Input a number");
 			return;
 		}
-
+		//fills an array with r1 random ints
 		int[] rands = new int[rl];
 		for(int i=0;i<rands.length;i++)
 			rands[i] = r.nextInt(125) + 1;
+		//adds randoms to iInputs and converts the numbers to string to be displayed
 		String rString = "";
 		for(int i=0;i<rands.length;i++) {
 			iInputs.add(rands[i]);
@@ -364,10 +380,13 @@ class GUI extends JPanel implements ActionListener {
 	//input handling and validation for the text input box
 		int i;
 		try {
+			//checks if there is already an output string in the program memory
 			String txt = textInput.getText();
 			if(output == null) {
 				output = "";
-		    } else if(output.length() > 0) {		
+		    } else if(output.length() > 0) {	
+			//adds a comma to the end of the output string if there isn't one
+			//so added characters aren't rejected
 				if(output.charAt((output.length() -1)) != ',' && 
 					txt.charAt(0)!= ',') {
 				   output += ",";
@@ -385,6 +404,7 @@ class GUI extends JPanel implements ActionListener {
 				}
 			}
 			sInputs = output.split(",");
+			//creates an array out of output to check bounds of each entry
 			for (i=0; i < sInputs.length; i++) {
 				if(!Utility.inBounds(Integer.parseInt(sInputs[i]))) {
 					JOptionPane.showMessageDialog(null,"Input "+sInputs[i]+
@@ -420,7 +440,7 @@ class GUI extends JPanel implements ActionListener {
 			dpinit = false;
 			iInputs = Utility.sort(vis.cmode,
 								   Utility.textToArrayList(cInput.getText()));
-          	//reassigning iInputs each time to fix a bug with C-SCAN
+          	//iInputs is reassigned each time to prevent a bug with C-SCAN
 			vis.setInputs(iInputs);
 			vis.action = true;
             submitting = true;

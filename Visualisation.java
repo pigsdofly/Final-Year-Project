@@ -1,3 +1,4 @@
+/* Written by Samuel Pearce, ID: B223185*/
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -9,13 +10,14 @@ class Visualisation {
 	public int cmode; //current mode. Not static because visualisation object should only be made once
 	private String[] modes = {"First Come First Serve","Shortest Seek Time First",
 							  "SCAN","Circular-SCAN","C-LOOK"};
-    public boolean action = false; //boolean for if animation is happening
+    public boolean action = false; //flag for animations
 
 	private Dimension vSize;
 	private int rectX, rectY,circX,graphX,graphY,centerX,centerY;
 	private ArrayList<Integer> inputs;
 
 	public Visualisation(Dimension vSize) {
+	//constructor, parameter is the size of the parent JPanel
 		cmode = 0;
 		updateSize(vSize);
 	}
@@ -67,10 +69,11 @@ class Visualisation {
 
 
 	public int[][] getPoly(double u) {
+    //dimensions for triangle representing disk head
+	//tip of head position changes depending on given parameter
 		centerX = (int) (rectX * 0.4) +(int) u - 5;
         centerY = (rectY + (rectY/10))/2;
 		int[][] dimensions = {{centerX,(int)(rectX*0.7)-10, (int)(rectX*0.8)-10},{centerY,rectY+20, rectY}};
-        //dimensions for triangle representing disk head
 	
 		System.out.println("centerX: "+centerX);
 
