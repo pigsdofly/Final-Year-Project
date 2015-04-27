@@ -14,7 +14,7 @@ java main
 To Use:
 -------
 
-- Enter a list of random numbers (either in the text input or by clicking on random)
+- Enter a list of random numbers (either in the text input or by clicking on random and typing a number of ints)
 
 - Select a disk scheduling algorithm from the sidebar
 
@@ -24,7 +24,3 @@ To Use:
 
 - To clear inputs and stop the animation, click on the 'clear' button
 
-Issues:
-------
-
-- Changing the algorithm or clicking a button while an animation is going on will break it
